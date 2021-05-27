@@ -118,4 +118,6 @@ def logout():
 @gov.route("/check", methods=['POST'])
 @jwt_required()
 def check():
-    return "Hi"
+    msg = "Logged in"
+    
+    return jsonify(msg = msg), 200
