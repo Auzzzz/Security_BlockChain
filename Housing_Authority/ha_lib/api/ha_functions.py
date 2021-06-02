@@ -7,9 +7,9 @@ class ha_functions():
 
     def newApplication(exact_address, town, postcode, appraised_value, wanted_value, current_owner_id):
 
-
         propertyNumber = ha_functions.propertyNumber(exact_address, town, postcode)
         
+        # create the json format needed with the values of the property
         application = {
                 "propertyNumber": propertyNumber,
                 "prop_id":propertyNumber,
@@ -25,9 +25,12 @@ class ha_functions():
                 "bank_loan_id":""
             }
         
+        # Set
         q = 'http://%s/api/add' % (auth_api,)
-        res = requests.post(q, json= application)
 
+        # Post/Get
+        res = requests.post(q, json= application)
+        
         return jsonify(msg = res.content, propertyNumber=propertyNumber)
 
     def getIndividual(propertyNumber):
