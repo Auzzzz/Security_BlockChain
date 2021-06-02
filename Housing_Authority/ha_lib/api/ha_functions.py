@@ -1,49 +1,79 @@
+import hashlib, requests, urllib
+from flask import Flask, Blueprint, json, request, jsonify
+
+from o import auth_api
+
+class ha_functions():
+
+    def newApplication(exact_address, town, postcode, appraised_value, wanted_value, current_owner_id):
 
 
-class ha_bc:
-    def __init__(self):
-        self.transactions = []
-        self.chain = []
-
-        # Create the genesis block
-        self.new_block(previous_hash='1')
-
-    # find the last block id
-    @property
-    def last_block(self):
-        return self.chain[-1]
-
-    def blockchain_valid_check(chain):
-
-        last_block = chain[0]
-        index = 1
-
-        while index < len(chain):
-            block = chain[index]
-            print(f'{last_block}')
-            print(f'{block}')
-            print("\n-----------\n")
-            
-            # Rehash to check the hash is correct
-            last_block_hash = self.hash(last_block)
-            if block['previous_hash'] != last_block_hash:
-                return False
-
-            last_block = block
-            index += 1
-
-        return True
-
-
-    def assign_permit(self, ha_staff_id, reciver, permit_id):
+        propertyNumber = ha_functions.propertyNumber(exact_address, town, postcode)
         
-        # Add permit to a block as a "transaction" between the Authority and the inidivdual
+        application = {
+                "propertyNumber": propertyNumber,
+                "prop_id":propertyNumber,
+                "exact_address":exact_address,
+                "town":town,
+                "postcode":postcode,
+                "appraised_value":appraised_value,
+                "wanted_value":wanted_value,
+                "current_owner_id":current_owner_id,
+                "application_ipfs":"",
+                "status":"Open",
+                "auth_s_id":"",
+                "bank_loan_id":""
+            }
+        
+        q = 'http://%s/api/add' % (auth_api,)
+        res = requests.post(q, json= application)
 
-        self.transactions.append({
-            'ha_approver': ha_staff_id,
-            'reciver': reciver,
-            'permit_id': permit_id,
-        })
-    
-        return self.last_block['index'] + 1
+        return jsonify(msg = res.content, propertyNumber=propertyNumber)
 
+    def getIndividual(propertyNumber):
+        # Set
+        q = 'http://%s/api/query/%s' % (auth_api, propertyNumber)
+
+        # Post/Get
+        res = requests.get(q)
+        
+        # return the content of the reply
+        return res.content
+
+    def getAll():
+        # Set
+        q = 'http://%s/api/query/all' % (auth_api)
+
+        # Post/Get
+        res = requests.get(q)
+        
+        # return the content of the reply
+        return res.content
+
+    def changeOwner(propertyNumber, new_owner_id):
+        
+        json = {
+            "prop_index": propertyNumber,
+            "owner":new_owner_id
+        }
+
+        # Set
+        q = 'http://%s/api/changeowner' % (auth_api)
+
+        # Post/Get
+        res = requests.put(q, json = json)
+        
+        # return the content of the reply
+        return res.content
+
+
+
+    def propertyNumber(exact_Address, town, postcode):
+
+        # Make one string
+        string = "EA=" + str(exact_Address) + "T=" + str(town) + "P=" + str(postcode)
+        # String to bytes
+        string = str.encode(string)
+
+        # Return a sha256 string
+        return hashlib.sha256(string).hexdigest()

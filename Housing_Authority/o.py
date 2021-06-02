@@ -11,6 +11,8 @@ db = SQLAlchemy()
 # JwtManager object
 jwt = JWTManager(app)
 
+auth_api = "178.128.149.221:8080"
+
 # MySQL Server Connection
 HOST = "128.199.0.44"
 USER = "user"
